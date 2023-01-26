@@ -58,9 +58,6 @@ func listSecFilings(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 	for idx := range *filer.Filings.Recent.AccessionNumber {
 		filing := edgar.Filing{}
 		filing.CIK = filer.CIK
-		// for idx, _ := range *filer.Filings.Recent.AccessionNumber {
-		// 	logger.Error((*filer.Filings.Recent.AccessionNumber)[idx])
-		// }
 		if filer.Filings.Recent.AccessionNumber != nil {
 			filing.AccessionNumber = &(*filer.Filings.Recent.AccessionNumber)[idx]
 		}
