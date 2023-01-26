@@ -12,7 +12,7 @@ import (
 
 func tableFinanceQuote(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "finance_quote",
+		Name:        "quote",
 		Description: "Most recent available quote for the given symbol.",
 		List: &plugin.ListConfig{
 			Hydrate:    listQuote,
@@ -80,7 +80,7 @@ func listQuote(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) 
 	symbol := quals["symbol"].GetStringValue()
 	q, err := quote.Get(symbol)
 	if err != nil {
-		plugin.Logger(ctx).Error("finance_quote.listQuote", "query_error", err)
+		plugin.Logger(ctx).Error("quote.listQuote", "query_error", err)
 		return nil, err
 	}
 	d.StreamListItem(ctx, q)

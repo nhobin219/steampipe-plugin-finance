@@ -19,11 +19,12 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			TotalMaxConcurrency: 10,
 		},
 		TableMap: map[string]*plugin.Table{
-			"finance_us_sec_public_company": tableFinanceUsSecPublicCompany(ctx),
-			"finance_us_sec_filer":          tableFinanceUsSecFiler(ctx),
-			"finance_quote":                 tableFinanceQuote(ctx),
-			"finance_quote_daily":           tableFinanceQuoteDaily(ctx),
-			"finance_quote_hourly":          tableFinanceQuoteHourly(ctx),
+			"companies":    tableCompanies(ctx),
+			"sec_filers":   tableSecFilers(ctx),
+			"sec_filings":  tableSecFilings(ctx),
+			"quote":        tableFinanceQuote(ctx),
+			"quote_daily":  tableFinanceQuoteDaily(ctx),
+			"quote_hourly": tableFinanceQuoteHourly(ctx),
 		},
 	}
 	return p

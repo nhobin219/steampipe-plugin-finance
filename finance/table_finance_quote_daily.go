@@ -12,7 +12,7 @@ import (
 
 func tableFinanceQuoteDaily(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "finance_quote_daily",
+		Name:        "quote_daily",
 		Description: "Daily historical quotes for a given symbol.",
 		List: &plugin.ListConfig{
 			Hydrate:    listQuoteDaily,
@@ -43,7 +43,7 @@ func listQuoteDaily(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 		d.StreamListItem(ctx, b)
 	}
 	if err := iter.Err(); err != nil {
-		plugin.Logger(ctx).Error("finance_quote_daily.listQuoteDaily", "query_error", err)
+		plugin.Logger(ctx).Error("quote_daily.listQuoteDaily", "query_error", err)
 		return nil, err
 	}
 	return nil, nil
