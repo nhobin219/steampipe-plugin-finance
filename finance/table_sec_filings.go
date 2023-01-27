@@ -2,7 +2,10 @@ package finance
 
 import (
 	"context"
+	"fmt"
 	"os"
+	"strconv"
+	"strings"
 
 	"github.com/turbot/steampipe-plugin-finance/pkg/edgar"
 
@@ -35,6 +38,7 @@ func tableSecFilings(ctx context.Context) *plugin.Table {
 			{Name: "is_inline_xbrl", Type: proto.ColumnType_INT, Transform: transform.FromField("IsInlineXBRL"), Description: "Whether or not the filing is in inline XBRL format."},
 			{Name: "primary_document", Type: proto.ColumnType_STRING, Description: "Primary document of the filing."},
 			{Name: "primary_doc_description", Type: proto.ColumnType_STRING, Description: "Primary document description."},
+			{Name: "index_url", Type: proto.ColumnType_STRING, Description: "Index URL of the filing."},
 		},
 	}
 }
@@ -60,6 +64,11 @@ func listSecFilings(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 		filing.CIK = filer.CIK
 		if filer.Filings.Recent.AccessionNumber != nil {
 			filing.AccessionNumber = &(*filer.Filings.Recent.AccessionNumber)[idx]
+			// index_url
+			filing.IndexURL, err = extractIndexURL(filing.CIK, filing.AccessionNumber)
+			if err != nil {
+				panic("Unable to extract valid index URL.")
+			}
 		}
 		if filer.Filings.Recent.FilingDate != nil {
 			filing.FilingDate = &(*filer.Filings.Recent.FilingDate)[idx]
@@ -96,6 +105,9 @@ func listSecFilings(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 		}
 		if filer.Filings.Recent.PrimaryDocument != nil {
 			filing.PrimaryDocument = &(*filer.Filings.Recent.PrimaryDocument)[idx]
+			if filer.Filings.Recent.AccessionNumber != nil {
+				filing.PrimaryDocument, err = extractDocumentUrl(filing.CIK, filing.AccessionNumber, filing.PrimaryDocument)
+			}
 		}
 		if filer.Filings.Recent.PrimaryDocDescription != nil {
 			filing.PrimaryDocDescription = &(*filer.Filings.Recent.PrimaryDocDescription)[idx]
@@ -103,4 +115,34 @@ func listSecFilings(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 		d.StreamListItem(ctx, &filing)
 	}
 	return nil, nil
+}
+
+// https://www.sec.gov/Archives/edgar/data/320193/000121465923000970/0001214659-23-000970-index.htm
+
+const secDataArchivesUrl string = "https://www.sec.gov/Archives/edgar/data"
+
+// NOTE: the following are custom transformations run outside of the steampipe transformation framework and during the actual call to the HydrateFunction
+
+func extractIndexURL(cik, accessionNumber *string) (*string, error) {
+	compactAccessionNumber := strings.Replace(*accessionNumber, "-", "", -1)
+	cikInt, err := strconv.ParseInt(*cik, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	indexURL := strings.Join([]string{secDataArchivesUrl, fmt.Sprint(cikInt), compactAccessionNumber, *accessionNumber}, "/") + "-index.htm"
+
+	return &indexURL, nil
+}
+
+func extractDocumentUrl(cik, accessionNumber, primaryDocument *string) (*string, error) {
+	compactAccessionNumber := strings.Replace(*accessionNumber, "-", "", -1)
+	cikInt, err := strconv.ParseInt(*cik, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	indexURL := strings.Join([]string{secDataArchivesUrl, fmt.Sprint(cikInt), compactAccessionNumber, *primaryDocument}, "/")
+
+	return &indexURL, nil
 }

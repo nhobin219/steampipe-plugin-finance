@@ -97,7 +97,8 @@ type FilingTable struct {
 
 // TODO: in client.go, convert FilingTable results to []Filing (column major -> row major)
 type Filing struct {
-	CIK                   *string    `json:"cik"` // NOTE: this is a hack for easy unpacking of values in steampipe
+	CIK                   *string    `json:"cik"`       // NOTE: this is a hack for easy unpacking of values in steampipe
+	IndexURL              *string    `json:"index_url"` // NOTE: this is a hack for easy unpacking of values in steampipe
 	AccessionNumber       *string    `json:"accessionNumber"`
 	FilingDate            *string    `json:"filingDate"`
 	ReportDate            *string    `json:"reportDate"`

@@ -85,11 +85,19 @@ func transformCIK(ctx context.Context, td *transform.TransformData) (interface{}
 
 	// sometimes EDGAR stores CIKs as 9 digit strings with the preceding zeros and other times it
 	// does not. The behaviour is inconsistent.
-	var cik string
-	if len(*shortCik) == 10 {
-		cik = *shortCik
-	} else if len(*shortCik) == 7 {
-		cik = "000" + *shortCik
+	var cik string = *shortCik
+	var cikLen int = len(*shortCik)
+	const standardCikLen int = 10
+	if cikLen == standardCikLen {
+		return &cik, nil
+	} else if cikLen < standardCikLen {
+		var prefix string
+		for i := 0; i < standardCikLen-cikLen; i++ {
+			prefix += "0"
+		}
+		cik = prefix + cik
+		return &cik, nil
+	} else {
+		panic("Invalid CIK: CIK longer than 10 characters.")
 	}
-	return &cik, nil
 }
