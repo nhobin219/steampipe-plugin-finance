@@ -146,6 +146,8 @@ func (c *client) GetSubmissions(cik string) (submissions *SubmissionsSearchResul
 	if err != nil {
 		return submissions, err
 	}
+	// NOTE: sleep for 100ms
+	time.Sleep(100 * time.Millisecond)
 
 	err = unmarshall(resp, submissions)
 	return submissions, err
